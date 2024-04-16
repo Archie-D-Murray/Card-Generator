@@ -1,4 +1,4 @@
-use std::{io::Write, str::FromStr};
+use std::{fmt::Display, io::Write, str::FromStr};
 
 use rand::Rng;
 
@@ -8,12 +8,19 @@ fn apply_multiplier(value: i32, multiplier: f32) -> i32 {
     (value as f32 * multiplier).floor() as i32
 }
 
+#[derive(Debug, Clone)]
 enum Rarity {
     Bad,
     NotGreat,
     Normal,
     Good,
     Great,
+}
+
+impl Display for Rarity {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
 }
 
 fn cost_from_rarity(rarity: &Rarity) -> Vec<i32> {
@@ -100,6 +107,7 @@ struct Card {
     budget: i32,
     priority: u32,
     barnacles: i32,
+    rarity: Rarity,
     budget_share: (f32, f32),
     range: Option<Range>,
     effect: Option<Effect>,
@@ -124,12 +132,13 @@ impl Card {
     pub fn new(rarity: Rarity, efficiency: Efficiency, effect_share: f32) -> Card {
         let range = cost_from_rarity(&rarity);
         let mut rng = rand::thread_rng();
-        let rarity = range[rng.gen_range(0..range.len())];
-        let budget = apply_multiplier(rarity, multiplier_from_efficiency(&efficiency));
+        let rarity_value = range[rng.gen_range(0..range.len())];
+        let budget = apply_multiplier(rarity_value, multiplier_from_efficiency(&efficiency));
         Card {
             budget,
+            rarity,
             priority: DEFAULT_PRIORITY,
-            barnacles: apply_multiplier(rarity, 1.0 / multiplier_from_efficiency(&efficiency)),
+            barnacles: apply_multiplier(rarity_value, 1.0 / multiplier_from_efficiency(&efficiency)),
             budget_share: (effect_share, 1.0 - effect_share),
             range: None,
             effect: None,
@@ -149,6 +158,17 @@ impl Card {
         self.budget -= used;
         self.effect = created_effect;
         self
+    }
+
+    pub fn get_recast(&self) -> i32 {
+        apply_multiplier(self.barnacles, 1.5)
+    }
+
+    pub fn to_string(&self) -> String {
+        // Rarity, Effect, Cost, Recast Cost
+        String::from(
+            format!("CARD: \n\tRarity: {:?}, \n\tCast: {} barnacles\n\tRecast: {} barnacles, \n\tEffect: {:?}", self.rarity, self.barnacles, self.get_recast(), self.effect.clone().unwrap())
+        )
     }
 
     pub fn build(&mut self) -> Result<Card, String> {
@@ -176,7 +196,7 @@ fn main() {
     println!("New budget: {}", card.budget);
     let card_result = card.build();
     match card_result {
-        Ok(card) => println!("{:?}", card),
+        Ok(card) => println!("\nGenerated Card:\n{}", card.to_string()),
         Err(err) => eprintln!("ERROR: {}", err),
     }
 }
@@ -222,7 +242,7 @@ fn get_effect(budget: i32) -> Effect {
         1,
         4,
         String::from(format!(
-            "1: Damage (Cost: {})\n2: Heal (Cost: {})\n3: DoT (Cost: {} x turn duration)\n4: Acid Healing (Cost: {})\nEnter effect type: (1..4).. ",
+            "1: Damage (Cost: {})\t2: Heal (Cost: {})\t3: DoT (Cost: {} x turn duration)\t4: Acid Healing (Cost: {})\nEnter effect type: (1..4).. ",
             display_effect_cost(cost_from_effect(Effect::Damage(0), budget)),
             display_effect_cost(cost_from_effect(Effect::Heal(0), budget)),
             display_effect_cost(cost_from_effect(Effect::DoT(0, 2), budget)),
@@ -246,7 +266,7 @@ fn get_range() -> Range {
         1, 
         4,
         String::from(format!(
-            "1: Single (Cost: {})\n2: Multiple (2) (Cost: {})\n3: AoE (room) (Cost: {})\n4: AoE (Extended) (Cost: {})\nEnter range type: (1..4).. ",
+            "1: Single (Cost: {})\t2: Multiple (2) (Cost: {})\t3: AoE (room) (Cost: {})\t4: AoE (Extended) (Cost: {})\nEnter range type: (1..4).. ",
             cost_from_range(Range::Single),
             cost_from_range(Range::Multiple),
             cost_from_range(Range::AoE),
@@ -264,7 +284,7 @@ fn get_efficiency() -> Efficiency {
     match get_num(
         1,
         3,
-        String::from("1 Bad\n2: Normal\n3: Good\nEnter efficiency: (1..3).. "),
+        String::from("1 Bad\t2: Normal\t3: Good\nEnter efficiency: (1..3).. "),
     ) - 1i32
     {
         0 => Efficiency::Bad,
@@ -279,7 +299,7 @@ fn get_rarity() -> Rarity {
         1,
         5,
         String::from(
-            "1: Bad\n2: Not Great\n3: Normal\n4: Good\n5: Great\nEnter rarity type: (1..5).. ",
+            "1: Bad\t2: Not Great\t3: Normal\t4: Good\t5: Great\nEnter rarity type: (1..5).. ",
         ),
     ) - 1i32
     {
