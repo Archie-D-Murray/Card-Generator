@@ -48,23 +48,32 @@ enum Effect {
     DoT(i32, i32),
 }
 
-fn cost_from_effect(effect: Effect, budget: i32) -> (Effect, i32) {
+fn cost_from_effect(effect: Effect, budget: i32) -> (Option<Effect>, i32) {
     match effect {
         Effect::Heal(_) => {
             let amount = (budget as f32 / 1.5).floor() as i32;
-            (Effect::Heal(amount), (amount as f32 * 1.5).floor() as i32)
-        }
+            if amount > 0 {
+                (Some(Effect::Heal(amount)), (amount as f32 * 1.5).floor() as i32)
+            } else {
+                (None, budget)
+            }
+        },
         Effect::AcidHeal(_) => {
             let amount = (budget as f32 / 1.75).floor() as i32;
-            (
-                Effect::AcidHeal(amount),
-                (amount as f32 * 1.75).floor() as i32,
-            )
-        }
-        Effect::Damage(_) => (Effect::Damage(budget), budget),
+            if amount > 0 {
+                (Some(Effect::AcidHeal(amount)), (amount as f32 * 1.75).floor() as i32)
+            } else {
+                (None, budget)
+            }
+        },
+        Effect::Damage(_) => (Some(Effect::Damage(budget)), budget),
         Effect::DoT(_, duration) => {
             let tick = budget / duration;
-            (Effect::DoT(tick, duration), tick * duration)
+            if tick > 0 {
+                (Some(Effect::DoT(tick, duration)), tick * duration)
+            } else {
+                (None, budget)
+            }
         }
     }
 }
@@ -138,7 +147,7 @@ impl Card {
         let (created_effect, used) =
             cost_from_effect(effect, apply_multiplier(self.budget.max(0), self.budget_share.0));
         self.budget -= used;
-        self.effect = Some(created_effect);
+        self.effect = created_effect;
         self
     }
 
@@ -163,7 +172,7 @@ fn main() {
     println!("Created card with power budget: {} and split {}/{}", card.budget, card.budget_share.0, card.budget_share.1);
     card.with_range(get_range());
     println!("New budget: {}", card.budget);
-    card.with_effect(get_effect());
+    card.with_effect(get_effect(apply_multiplier(card.budget, card.budget_share.0)));
     println!("New budget: {}", card.budget);
     let card_result = card.build();
     match card_result {
@@ -200,13 +209,25 @@ fn get_effect_share() -> f32 {
     get_num(0.0, 1.0, String::from("Enter effect share: (0.0..1.0).. "))
 }
 
-fn get_effect() -> Effect {
+fn display_effect_cost(effect_data: (Option<Effect>, i32)) -> String {
+    if effect_data.0.is_some() {
+        String::from(format!("{}", effect_data.1))
+    } else {
+        String::from("N/A")
+    }
+}
+
+fn get_effect(budget: i32) -> Effect {
     let effect_type: i32 = get_num(
         1,
         4,
-        String::from(
-            "1: Damage\n2: Heal\n3: DoT\n4: Acid Healing\nEnter effect type: (1..4).. ",
-        ),
+        String::from(format!(
+            "1: Damage (Cost: {})\n2: Heal (Cost: {})\n3: DoT (Cost: {} x turn duration)\n4: Acid Healing (Cost: {})\nEnter effect type: (1..4).. ",
+            display_effect_cost(cost_from_effect(Effect::Damage(0), budget)),
+            display_effect_cost(cost_from_effect(Effect::Heal(0), budget)),
+            display_effect_cost(cost_from_effect(Effect::DoT(0, 2), budget)),
+            display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget)),
+        )),
     ) - 1;
     match effect_type {
         0 => Effect::Damage(0),
@@ -221,7 +242,16 @@ fn get_effect() -> Effect {
 }
 
 fn get_range() -> Range {
-    match get_num(1, 4, String::from("1: Single\n2: Multiple (2)\n3: AoE (room)\n4: AoE (Extended)\nEnter range type: (1..4).. ")) - 1i32 {
+    match get_num(
+        1, 
+        4,
+        String::from(format!(
+            "1: Single (Cost: {})\n2: Multiple (2) (Cost: {})\n3: AoE (room) (Cost: {})\n4: AoE (Extended) (Cost: {})\nEnter range type: (1..4).. ",
+            cost_from_range(Range::Single),
+            cost_from_range(Range::Multiple),
+            cost_from_range(Range::AoE),
+            cost_from_range(Range::ExtendedAoE)
+        ))) - 1i32 {
         0 => Range::Single,
         1 => Range::Multiple,
         2 => Range::AoE,
