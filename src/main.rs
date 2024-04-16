@@ -3,6 +3,17 @@ use std::{fmt::Display, io::Write, str::FromStr};
 use rand::Rng;
 
 const DEFAULT_PRIORITY: u32 = 11;
+const padding: usize = 36;
+
+fn pad_right(string: String, len: usize, whitespace_ch: char) -> String {
+    let mut padded = String::with_capacity(len); 
+    padded.push_str(string.as_str());
+    for _ in 0..(len - string.len()) {
+    padded.push(whitespace_ch);
+    }
+
+    padded
+}
 
 fn apply_multiplier(value: i32, multiplier: f32) -> i32 {
     (value as f32 * multiplier).floor() as i32
@@ -241,19 +252,21 @@ fn get_effect(budget: i32) -> Effect {
     let effect_type: i32 = get_num(
         1,
         4,
-        String::from(format!(
-            "1: Damage (Cost: {})\t2: Heal (Cost: {})\t3: DoT (Cost: {} x turn duration)\t4: Acid Healing (Cost: {})\nEnter effect type: (1..4).. ",
-            display_effect_cost(cost_from_effect(Effect::Damage(0), budget)),
-            display_effect_cost(cost_from_effect(Effect::Heal(0), budget)),
-            display_effect_cost(cost_from_effect(Effect::DoT(0, 2), budget)),
-            display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget)),
-        )),
+        String::from(
+            format!("{}{}{}{}\n{}", 
+                pad_right(format!("1: Damage (Cost: {})", display_effect_cost(cost_from_effect(Effect::Damage(0), budget))), padding, ' '),
+                pad_right(format!("2: Heal (Cost: {})", display_effect_cost(cost_from_effect(Effect::Heal(0), budget))), padding, ' '),
+                pad_right(format!( "3: DoT (Cost: {} x turn duration)", display_effect_cost(cost_from_effect(Effect::DoT(0, 2), budget))), padding, ' '),
+                pad_right(format!("4: Acid Healing (Cost: {})", display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget))), padding, ' '),
+                "Enter effect type: (1..4).. "
+            )
+        ),
     ) - 1;
     match effect_type {
         0 => Effect::Damage(0),
         1 => Effect::Heal(0),
         2 => {
-            let turns: i32 = get_num(2, 4, String::from("Enter turn duration (2..4):\t"));
+            let turns: i32 = get_num(2, 4, String::from("\tEnter turn duration (2..4):\t"));
             Effect::DoT(0, turns)
         }
         3 => Effect::AcidHeal(0),
@@ -265,13 +278,14 @@ fn get_range() -> Range {
     match get_num(
         1, 
         4,
-        String::from(format!(
-            "1: Single (Cost: {})\t2: Multiple (2) (Cost: {})\t3: AoE (room) (Cost: {})\t4: AoE (Extended) (Cost: {})\nEnter range type: (1..4).. ",
-            cost_from_range(Range::Single),
-            cost_from_range(Range::Multiple),
-            cost_from_range(Range::AoE),
-            cost_from_range(Range::ExtendedAoE)
-        ))) - 1i32 {
+        String::from(
+            format!("{}{}{}{}\nEnter range type: (1..4).. ",
+                pad_right(format!("1: Single (Cost: {})", cost_from_range(Range::Single)), padding, ' '),
+                pad_right(format!("2: Multiple (2) (Cost: {})", cost_from_range(Range::Multiple)), padding, ' '),
+                pad_right(format!("3: AoE (room) (Cost: {})", cost_from_range(Range::AoE)), padding, ' '),
+                pad_right(format!("4: AoE (Extended) (Cost: {})", cost_from_range(Range::ExtendedAoE)), padding, ' '),
+            )
+        )) - 1i32 {
         0 => Range::Single,
         1 => Range::Multiple,
         2 => Range::AoE,
@@ -284,7 +298,12 @@ fn get_efficiency() -> Efficiency {
     match get_num(
         1,
         3,
-        String::from("1 Bad\t2: Normal\t3: Good\nEnter efficiency: (1..3).. "),
+        String::from(
+            format!("{}{}{}\n Enter efficiency: (1..3).. ",
+                pad_right("1: Bad".into(), padding, ' '),
+                pad_right("2: Normal".into(), padding, ' '),
+                pad_right("3: Good".into(), padding, ' '),
+            )),
     ) - 1i32
     {
         0 => Efficiency::Bad,
@@ -299,8 +318,13 @@ fn get_rarity() -> Rarity {
         1,
         5,
         String::from(
-            "1: Bad\t2: Not Great\t3: Normal\t4: Good\t5: Great\nEnter rarity type: (1..5).. ",
-        ),
+            format!("{}{}{}{}{}\n Enter rarity: (1..5).. ",
+                pad_right("1: Bad".into(), padding, ' '),
+                pad_right("2: Not Great".into(), padding, ' '),
+                pad_right("3: Normal".into(), padding, ' '),
+                pad_right("4: Good".into(), padding, ' '),
+                pad_right("5: Great".into(), padding, ' '),
+            )),
     ) - 1i32
     {
         0 => Rarity::Bad,
