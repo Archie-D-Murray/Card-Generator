@@ -3,7 +3,7 @@ use std::{fmt::Display, io::Write, str::FromStr};
 use rand::Rng;
 
 const DEFAULT_PRIORITY: u32 = 11;
-const padding: usize = 36;
+const PADDING: usize = 36;
 
 fn pad_right(string: String, len: usize, whitespace_ch: char) -> String {
     let mut padded = String::with_capacity(len); 
@@ -253,12 +253,11 @@ fn get_effect(budget: i32) -> Effect {
         1,
         4,
         String::from(
-            format!("{}{}{}{}\n{}", 
-                pad_right(format!("1: Damage (Cost: {})", display_effect_cost(cost_from_effect(Effect::Damage(0), budget))), padding, ' '),
-                pad_right(format!("2: Heal (Cost: {})", display_effect_cost(cost_from_effect(Effect::Heal(0), budget))), padding, ' '),
-                pad_right(format!( "3: DoT (Cost: {} x turn duration)", display_effect_cost(cost_from_effect(Effect::DoT(0, 2), budget))), padding, ' '),
-                pad_right(format!("4: Acid Healing (Cost: {})", display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget))), padding, ' '),
-                "Enter effect type: (1..4).. "
+            format!("{}{}{}{}\nEnter effect type: (1..4).. ", 
+                pad_right(format!("1: Damage (Cost: {})", display_effect_cost(cost_from_effect(Effect::Damage(0), budget))), PADDING, ' '),
+                pad_right(format!("2: Heal (Cost: {})", display_effect_cost(cost_from_effect(Effect::Heal(0), budget))), PADDING, ' '),
+                pad_right(format!( "3: DoT (Cost: {} x turn duration)", display_effect_cost(cost_from_effect(Effect::DoT(0, 2), budget))), PADDING, ' '),
+                pad_right(format!("4: Acid Healing (Cost: {})", display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget))), PADDING, ' '),
             )
         ),
     ) - 1;
@@ -280,10 +279,10 @@ fn get_range() -> Range {
         4,
         String::from(
             format!("{}{}{}{}\nEnter range type: (1..4).. ",
-                pad_right(format!("1: Single (Cost: {})", cost_from_range(Range::Single)), padding, ' '),
-                pad_right(format!("2: Multiple (2) (Cost: {})", cost_from_range(Range::Multiple)), padding, ' '),
-                pad_right(format!("3: AoE (room) (Cost: {})", cost_from_range(Range::AoE)), padding, ' '),
-                pad_right(format!("4: AoE (Extended) (Cost: {})", cost_from_range(Range::ExtendedAoE)), padding, ' '),
+                pad_right(format!("1: Single (Cost: {})", cost_from_range(Range::Single)), PADDING, ' '),
+                pad_right(format!("2: Multiple (2) (Cost: {})", cost_from_range(Range::Multiple)), PADDING, ' '),
+                pad_right(format!("3: AoE (room) (Cost: {})", cost_from_range(Range::AoE)), PADDING, ' '),
+                pad_right(format!("4: AoE (Extended) (Cost: {})", cost_from_range(Range::ExtendedAoE)), PADDING, ' '),
             )
         )) - 1i32 {
         0 => Range::Single,
@@ -299,10 +298,10 @@ fn get_efficiency() -> Efficiency {
         1,
         3,
         String::from(
-            format!("{}{}{}\n Enter efficiency: (1..3).. ",
-                pad_right("1: Bad".into(), padding, ' '),
-                pad_right("2: Normal".into(), padding, ' '),
-                pad_right("3: Good".into(), padding, ' '),
+            format!("{}{}{}\nEnter efficiency: (1..3).. ",
+                pad_right("1: Bad".into(), PADDING, ' '),
+                pad_right("2: Normal".into(), PADDING, ' '),
+                pad_right("3: Good".into(), PADDING, ' '),
             )),
     ) - 1i32
     {
@@ -318,12 +317,12 @@ fn get_rarity() -> Rarity {
         1,
         5,
         String::from(
-            format!("{}{}{}{}{}\n Enter rarity: (1..5).. ",
-                pad_right("1: Bad".into(), padding, ' '),
-                pad_right("2: Not Great".into(), padding, ' '),
-                pad_right("3: Normal".into(), padding, ' '),
-                pad_right("4: Good".into(), padding, ' '),
-                pad_right("5: Great".into(), padding, ' '),
+            format!("{}{}{}{}{}\nEnter rarity: (1..5).. ",
+                pad_right("1: Bad".into(), PADDING, ' '),
+                pad_right("2: Not Great".into(), PADDING, ' '),
+                pad_right("3: Normal".into(), PADDING, ' '),
+                pad_right("4: Good".into(), PADDING, ' '),
+                pad_right("5: Great".into(), PADDING, ' '),
             )),
     ) - 1i32
     {
