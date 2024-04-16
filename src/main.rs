@@ -18,7 +18,7 @@ enum Rarity {
 
 fn cost_from_rarity(rarity: &Rarity) -> Vec<i32> {
     match rarity {
-        Rarity::Bad => vec![1, 2],
+        Rarity::Bad => vec![2, 2],
         Rarity::NotGreat => vec![3, 4],
         Rarity::Normal => vec![5, 6],
         Rarity::Good => vec![7, 8],
@@ -104,10 +104,10 @@ where
 }
 
 fn priority_from_budget(budget: i32) -> i32 {
-    if budget <= 0 {
+    if budget < 0 {
         0
     } else {
-        apply_multiplier(10, (1.0 - budget as f32 / 10.0).max(1.0))
+        apply_multiplier(10, (budget as f32 / 10.0).min(1.0)).max(1)
     }
 }
 
