@@ -178,7 +178,7 @@ impl Card {
     pub fn to_string(&self) -> String {
         // Rarity, Effect, Cost, Recast Cost
         String::from(
-            format!("CARD: \n\tRarity: {:?}, \n\tCast: {} barnacles\n\tRecast: {} barnacles, \n\tEffect: {:?}", self.rarity, self.barnacles, self.get_recast(), self.effect.clone().unwrap())
+            format!("CARD: \n\tPriority: {}\n\tRarity: {:?}\n\tCast: {} barnacles\n\tRecast: {} barnacles\n\tEffect: {:?}", self.priority, self.rarity, self.barnacles, self.get_recast(), self.effect.clone().unwrap())
         )
     }
 
