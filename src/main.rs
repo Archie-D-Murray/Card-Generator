@@ -1,4 +1,43 @@
-use std::{fmt::Display, io::Write, str::FromStr};
+use std::{fmt::Display, fs::OpenOptions, io::{Read, Write}, str::FromStr};
+
+use serde::{Deserialize, Serialize};
+use serde_json;
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct RarityRanges {
+    pub bad: [i32; 2],
+    pub not_great: [i32; 2],
+    pub normal: [i32; 2],
+    pub good: [i32; 2],
+    pub great: [i32; 2],
+}
+
+impl Default for RarityRanges {
+    fn default() -> Self {
+        RarityRanges {
+            bad: [2, 2],
+            not_great: [3, 4],
+            normal: [5, 6],
+            good: [7, 8],
+            great: [9, 10]
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct Config {
+    pub rarity_ranges: RarityRanges,
+    pub power_to_priority: f32
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            rarity_ranges: RarityRanges::default(),
+            power_to_priority: 1.0
+        }
+    }
+}
 
 use rand::Rng;
 
@@ -34,13 +73,13 @@ impl Display for Rarity {
     }
 }
 
-fn cost_from_rarity(rarity: &Rarity) -> Vec<i32> {
+fn cost_from_rarity(rarity: &Rarity, config: &Config) -> Vec<i32> {
     match rarity {
-        Rarity::Bad => vec![2, 2],
-        Rarity::NotGreat => vec![3, 4],
-        Rarity::Normal => vec![5, 6],
-        Rarity::Good => vec![7, 8],
-        Rarity::Great => vec![9, 10],
+        Rarity::Bad => config.rarity_ranges.bad.to_vec(),
+        Rarity::NotGreat => config.rarity_ranges.not_great.to_vec(),
+        Rarity::Normal => config.rarity_ranges.normal.to_vec(),
+        Rarity::Good => config.rarity_ranges.good.to_vec(),
+        Rarity::Great => config.rarity_ranges.great.to_vec(),
     }
 }
 
@@ -122,6 +161,7 @@ struct Card {
     budget_share: (f32, f32),
     range: Option<Range>,
     effect: Option<Effect>,
+    config: Config
 }
 
 fn in_range<T>(value: T, min: T, max: T) -> bool
@@ -131,17 +171,17 @@ where
     value >= min && value <= max
 }
 
-fn priority_from_budget(budget: i32) -> i32 {
+fn priority_from_budget(budget: i32, config: &Config) -> i32 {
     if budget < 0 {
         0
     } else {
-        apply_multiplier(10, (budget as f32 / 10.0).min(1.0)).max(1)
+        10 - apply_multiplier(budget, config.power_to_priority)
     }
 }
 
 impl Card {
-    pub fn new(rarity: Rarity, efficiency: Efficiency, effect_share: f32) -> Card {
-        let range = cost_from_rarity(&rarity);
+    pub fn new(rarity: Rarity, efficiency: Efficiency, effect_share: f32, config: Config) -> Card {
+        let range = cost_from_rarity(&rarity, &config);
         let mut rng = rand::thread_rng();
         let rarity_value = range[rng.gen_range(0..range.len())];
         let budget = apply_multiplier(rarity_value, multiplier_from_efficiency(&efficiency));
@@ -153,6 +193,7 @@ impl Card {
             budget_share: (effect_share, 1.0 - effect_share),
             range: None,
             effect: None,
+            config
         }
     }
 
@@ -178,12 +219,12 @@ impl Card {
     pub fn to_string(&self) -> String {
         // Rarity, Effect, Cost, Recast Cost
         String::from(
-            format!("CARD: \n\tPriority: {}\n\tRarity: {:?}\n\tCast: {} barnacles\n\tRecast: {} barnacles\n\tEffect: {:?}", self.priority, self.rarity, self.barnacles, self.get_recast(), self.effect.clone().unwrap())
+            format!("CARD: \n\tPriority: {}\n\tRarity: {:?}\n\tCast: {} barnacles\n\tRecast: {} barnacles\n\tEffect: {:?}, Range: {:?}", self.priority, self.rarity, self.barnacles, self.get_recast(), self.effect.clone().unwrap(), self.range.clone().unwrap())
         )
     }
 
     pub fn build(&mut self) -> Result<Card, String> {
-        self.priority -= priority_from_budget(self.budget) as u32;
+        self.priority -= priority_from_budget(self.budget, &self.config) as u32;
         if self.priority == DEFAULT_PRIORITY || self.barnacles == 0 {
             Err(String::from(format!(
                 "Card prio {} due to budget: {}",
@@ -196,10 +237,30 @@ impl Card {
 }
 
 fn main() {
+    static PATH: &str = "config.json";
+    let Ok(mut config_file) = OpenOptions::new().read(true).write(true).create(true).open(PATH) else { return; };
+    let mut contents = String::new();
+    let mut config_was_empty = false;
+    config_file.read_to_string(&mut contents).expect("Could not read file!");
+    let config = if contents.trim().is_empty() {
+        config_was_empty = true;
+        Config::default()
+    } else {
+        let deserialize = serde_json::from_str(contents.as_str());
+        if deserialize.is_err() {
+            config_was_empty = true;
+            let _ = config_file.set_len(0);
+        }
+        deserialize.unwrap_or(Config::default())
+    };
+    
+    if config_was_empty {
+        let _ = config_file.write_all(serde_json::to_string_pretty(&config).unwrap().as_bytes());
+    }
     let rarity = get_rarity();
     let efficiency = get_efficiency();
     let effect_share = get_effect_share();
-    let mut card = Card::new(rarity, efficiency, effect_share);
+    let mut card = Card::new(rarity, efficiency, effect_share, config);
     println!("Created card with power budget: {} and split {}/{}", card.budget, card.budget_share.0, card.budget_share.1);
     card.with_range(get_range());
     println!("New budget: {}", card.budget);

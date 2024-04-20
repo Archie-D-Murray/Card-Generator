@@ -1,0 +1,25 @@
+{
+  "rarity_ranges": {
+    "bad": [
+      2,
+      2
+    ],
+    "not_great": [
+      3,
+      4
+    ],
+    "normal": [
+      5,
+      6
+    ],
+    "good": [
+      7,
+      8
+    ],
+    "great": [
+      9,
+      10
+    ]
+  },
+  "power_to_priority": 1.0
+}
