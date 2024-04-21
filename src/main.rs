@@ -154,6 +154,7 @@ fn cost_from_range(range: Range) -> i32 {
 
 #[derive(Clone, Debug)]
 struct Card {
+    name: String,
     budget: i32,
     priority: u32,
     barnacles: i32,
@@ -175,17 +176,18 @@ fn priority_from_budget(budget: i32, config: &Config) -> i32 {
     if budget < 0 {
         0
     } else {
-        10 - apply_multiplier(budget, config.power_to_priority)
+        (apply_multiplier(budget, config.power_to_priority) + 1).min(DEFAULT_PRIORITY as i32)
     }
 }
 
 impl Card {
-    pub fn new(rarity: Rarity, efficiency: Efficiency, effect_share: f32, config: Config) -> Card {
+    pub fn new(name: String, rarity: Rarity, efficiency: Efficiency, effect_share: f32, config: Config) -> Card {
         let range = cost_from_rarity(&rarity, &config);
         let mut rng = rand::thread_rng();
         let rarity_value = range[rng.gen_range(0..range.len())];
         let budget = apply_multiplier(rarity_value, multiplier_from_efficiency(&efficiency));
         Card {
+            name,
             budget,
             rarity,
             priority: DEFAULT_PRIORITY,
@@ -219,7 +221,7 @@ impl Card {
     pub fn to_string(&self) -> String {
         // Rarity, Effect, Cost, Recast Cost
         String::from(
-            format!("CARD: \n\tPriority: {}\n\tRarity: {:?}\n\tCast: {} barnacles\n\tRecast: {} barnacles\n\tEffect: {:?}, Range: {:?}", self.priority, self.rarity, self.barnacles, self.get_recast(), self.effect.clone().unwrap(), self.range.clone().unwrap())
+            format!("{}: \n\tPriority: {}\n\tRarity: {:?}\n\tCast: {} barnacles\n\tRecast: {} barnacles\n\tEffect: {:?}, Range: {:?}", self.name, self.priority, self.rarity, self.barnacles, self.get_recast(), self.effect.clone().unwrap(), self.range.clone().unwrap())
         )
     }
 
@@ -257,10 +259,11 @@ fn main() {
     if config_was_empty {
         let _ = config_file.write_all(serde_json::to_string_pretty(&config).unwrap().as_bytes());
     }
+    let name = get_name();
     let rarity = get_rarity();
     let efficiency = get_efficiency();
     let effect_share = get_effect_share();
-    let mut card = Card::new(rarity, efficiency, effect_share, config);
+    let mut card = Card::new(name, rarity, efficiency, effect_share, config);
     println!("Created card with power budget: {} and split {}/{}", card.budget, card.budget_share.0, card.budget_share.1);
     card.with_range(get_range());
     println!("New budget: {}", card.budget);
@@ -268,7 +271,15 @@ fn main() {
     println!("New budget: {}", card.budget);
     let card_result = card.build();
     match card_result {
-        Ok(card) => println!("\nGenerated Card:\n{}", card.to_string()),
+        Ok(card) => {
+            let card_str = card.to_string();
+            println!("\nGenerated Card:\n{}", card.to_string());
+            let Ok(mut card_file) = OpenOptions::new().write(true).create(true).open(format!("{}.card", card.name)) else { println!("Could not open file: {}.card", card.name); return;};
+            let write_result = card_file.write_all(card_str.as_bytes());
+            if write_result.is_ok() {
+                println!("Wrote card to file: {}.card", card.name);
+            }
+        },
         Err(err) => eprintln!("ERROR: {}", err),
     }
 }
@@ -394,4 +405,12 @@ fn get_rarity() -> Rarity {
         4 => Rarity::Great,
         _ => Rarity::Bad,
     }
+}
+
+fn get_name() -> String {
+    let mut buf = String::new();
+    print!("Enter card name: ");
+    let _ = std::io::stdout().flush();
+    let _ = std::io::stdin().read_line(&mut buf);
+    String::from(buf.trim())
 }
