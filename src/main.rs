@@ -282,6 +282,9 @@ fn main() {
         },
         Err(err) => eprintln!("ERROR: {}", err),
     }
+    print!("Press any key to exit... ");
+    let _ = std::io::stdout().flush();
+    std::io::stdin().read(&mut [0]).unwrap();
 }
 
 fn get_num<T>(min: T, max: T, prompt: String) -> T
