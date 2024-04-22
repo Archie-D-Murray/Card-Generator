@@ -21,5 +21,29 @@
       10
     ]
   },
-  "power_to_priority": 1.0
+  "power_to_priority": 1.0,
+  "damage_range_modifiers": {
+    "single": 1.0,
+    "multiple": 1.0,
+    "aoe": 1.0,
+    "aoe_extended": 1.0
+  },
+  "heal_range_modifiers": {
+    "single": 1.0,
+    "multiple": 1.0,
+    "aoe": 1.0,
+    "aoe_extended": 1.0
+  },
+  "dot_range_modifiers": {
+    "single": 1.0,
+    "multiple": 1.0,
+    "aoe": 1.0,
+    "aoe_extended": 1.0
+  },
+  "acid_heal_range_modifiers": {
+    "single": 1.0,
+    "multiple": 1.0,
+    "aoe": 1.0,
+    "aoe_extended": 1.0
+  }
 }
