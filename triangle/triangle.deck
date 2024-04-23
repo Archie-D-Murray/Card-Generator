@@ -1,0 +1,42 @@
+{
+  "epic": {
+    "name": "Epic Damage",
+    "rarity": 4,
+    "efficiency": 2,
+    "effect_share": 0.8,
+    "range": 2,
+    "effect": 0
+  },
+  "rare": {
+    "name": "Rare Acid Heal",
+    "rarity": 3,
+    "efficiency": 0,
+    "effect_share": 0.75,
+    "range": 1,
+    "effect": 2
+  },
+  "uncommon_first": {
+    "name": "Uncommon Damage",
+    "rarity": 1,
+    "efficiency": 2,
+    "effect_share": 0.8,
+    "range": 0,
+    "effect": 0
+  },
+  "uncommon_second": {
+    "name": "Uncommon Heal",
+    "rarity": 1,
+    "efficiency": 1,
+    "effect_share": 0.75,
+    "range": 0,
+    "effect": 1
+  },
+  "common": {
+    "name": "Common Acid Heal",
+    "rarity": 0,
+    "efficiency": 2,
+    "effect_share": 0.75,
+    "range": 0,
+    "effect": 2
+  }
+}

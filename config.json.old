@@ -22,17 +22,17 @@
     ]
   },
   "power_to_priority": {
-    "common": 4.0,
-    "uncommon": 3.5,
-    "rare": 1.75,
-    "epic": 1.0,
-    "legendary": 0.75
+    "common": 2.0,
+    "uncommon": 1.75,
+    "rare": 1.5,
+    "epic": 1.25,
+    "legendary": 1.0
   },
   "damage_range_modifiers": {
     "single": 1.0,
     "multiple": 1.25,
-    "aoe": 0.875,
-    "aoe_extended": 0.75
+    "aoe": 0.75,
+    "aoe_extended": 0.66
   },
   "heal_range_modifiers": {
     "single": 1.0,

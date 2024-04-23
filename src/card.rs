@@ -110,9 +110,36 @@ impl Default for RarityRanges {
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct RarityPriorityModifiers {
+    pub common: f32,
+    pub uncommon: f32,
+    pub rare: f32,
+    pub epic: f32,
+    pub legendary: f32
+}
+
+impl Default for RarityPriorityModifiers {
+    fn default() -> Self {
+        RarityPriorityModifiers { common: 2.0, uncommon: 1.75, rare: 1.5, epic: 1.25, legendary: 1.0 }
+    }
+}
+
+impl RarityPriorityModifiers {
+    fn get_modifier(&self, rarity: &Rarity) -> f32 {
+        match rarity {
+            Rarity::Common => self.common,
+            Rarity::Uncommon => self.uncommon,
+            Rarity::Rare => self.rare,
+            Rarity::Epic => self.epic,
+            Rarity::Legendary => self.legendary,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Config {
     pub rarity_ranges: RarityRanges,
-    pub power_to_priority: f32,
+    pub power_to_priority: RarityPriorityModifiers,
     pub damage_range_modifiers: RangeModifiers,
     pub heal_range_modifiers: RangeModifiers,
     pub acid_heal_range_modifiers: RangeModifiers,
@@ -122,7 +149,7 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             rarity_ranges: RarityRanges::default(),
-            power_to_priority: 1.0,
+            power_to_priority: RarityPriorityModifiers::default(),
             damage_range_modifiers: RangeModifiers::default(),
             heal_range_modifiers: RangeModifiers::default(),
             acid_heal_range_modifiers: RangeModifiers::default(),
@@ -292,11 +319,11 @@ where
     value >= min && value <= max
 }
 
-pub fn priority_from_budget(budget: i32, config: &Config) -> i32 {
+pub fn priority_from_budget(budget: i32, rarity: &Rarity, config: &Config) -> i32 {
     if budget < 0 {
         0
     } else {
-        (apply_multiplier(budget, config.power_to_priority) + 1).min(DEFAULT_PRIORITY as i32)
+        (apply_multiplier(budget, config.power_to_priority.get_modifier(rarity)) + 1).min(DEFAULT_PRIORITY as i32)
     }
 }
 
@@ -348,7 +375,7 @@ impl Card {
     }
 
     pub fn build(&mut self) -> Result<Card, String> {
-        self.priority -= priority_from_budget(self.budget, &self.config) as u32;
+        self.priority -= priority_from_budget(self.budget, &self.rarity, &self.config) as u32;
         self.barnacles = get_barnacles(self);
         if self.priority == DEFAULT_PRIORITY || self.barnacles == 0 {
             Err(String::from(format!(

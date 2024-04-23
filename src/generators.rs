@@ -20,7 +20,11 @@ pub fn generate_cards(config: Config) {
             Ok(card) => {
                 let card_str = card.to_string();
                 println!("\nGenerated Card:\n{}", card.to_string());
-                let Ok(mut card_file) = OpenOptions::new().write(true).create(true).open(format!("{}.card", card.name)) else { println!("Could not open file: {}.card", card.name); return;};
+                let Ok(mut card_file) = OpenOptions::new()
+                    .write(true)
+                    .create(true)
+                    .truncate(true)
+                    .open(format!("{}.card", card.name)) else { println!("Could not open file: {}.card", card.name); return;};
                 let write_result = card_file.write_all(card_str.as_bytes());
                 if write_result.is_ok() {
                     println!("Wrote card to file: {}.card", card.name);
