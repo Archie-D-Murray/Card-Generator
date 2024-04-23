@@ -1,0 +1,89 @@
+{
+  "inputs": [
+    {
+      "name": "Legendary Heal",
+      "rarity": {
+        "type": "Legendary"
+      },
+      "efficiency": {
+        "type": "Normal"
+      },
+      "effect_share": 0.9,
+      "range": {
+        "type": "Multiple"
+      },
+      "effect": {
+        "type": "Heal",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Epic Acid Heal",
+      "rarity": {
+        "type": "Epic"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "effect_share": 0.6,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "AcidHeal",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Epic Damage",
+      "rarity": {
+        "type": "Epic"
+      },
+      "efficiency": {
+        "type": "Normal"
+      },
+      "effect_share": 0.75,
+      "range": {
+        "type": "Multiple"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Uncommon Damage",
+      "rarity": {
+        "type": "Uncommon"
+      },
+      "efficiency": {
+        "type": "Good"
+      },
+      "effect_share": 0.6,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Rare Acid Heal",
+      "rarity": {
+        "type": "Rare"
+      },
+      "efficiency": {
+        "type": "Good"
+      },
+      "effect_share": 0.5,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "AcidHeal",
+        "magnitude": 0
+      }
+    }
+  ]
+}

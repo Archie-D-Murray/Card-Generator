@@ -1,0 +1,89 @@
+{
+  "inputs": [
+    {
+      "name": "Epic",
+      "rarity": {
+        "type": "Epic"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "effect_share": 0.0,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Epic",
+      "rarity": {
+        "type": "Epic"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "effect_share": 0.0,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Rare",
+      "rarity": {
+        "type": "Rare"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "effect_share": 0.0,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Rare",
+      "rarity": {
+        "type": "Rare"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "effect_share": 0.0,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Uncommon",
+      "rarity": {
+        "type": "Uncommon"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "effect_share": 0.0,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 0
+      }
+    }
+  ]
+}
