@@ -24,7 +24,7 @@ pub fn generate_cards(config: Config) {
                     .write(true)
                     .create(true)
                     .truncate(true)
-                    .open(format!("{}.card", card.name)) else { println!("Could not open file: {}.card", card.name); return;};
+                    .open(format!("cards/{}.card", card.name)) else { println!("Could not open file: {}.card", card.name); return;};
                 let write_result = card_file.write_all(card_str.as_bytes());
                 if write_result.is_ok() {
                     println!("Wrote card to file: {}.card", card.name);
@@ -38,7 +38,7 @@ pub fn generate_cards(config: Config) {
 pub fn generate_deck(deck_name_opt: Option<String>, config: Config) {
     let Some(deck_name) = deck_name_opt else { println!("No deck name provided - must match folder name containing .deck file..."); return; };
     let mut options = OpenOptions::new();
-    let deck_folder = format!("{}/", deck_name);
+    let deck_folder = format!("decks/{}/", deck_name);
     let Ok(cards) = std::fs::read_dir(deck_folder.as_str()) else { println!("Could not read directory {}!", deck_folder); return; };
     for card in cards.filter_map(|res| res.ok()).map(|dir| dir.path()).filter(|path| path.extension().unwrap_or(&OsStr::new("")) == "card") {
         let path = card.clone().to_str().unwrap_or("Unknown").to_string();
