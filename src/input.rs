@@ -41,9 +41,9 @@ pub fn display_effect_cost(effect_data: (Option<Effect>, i32)) -> String {
 pub fn get_effect(budget: i32, card: &Card) -> Effect {
     let effect_type: i32 = get_num(
         1,
-        4,
+        3,
         String::from(
-            format!("{}{}{}\nEnter effect type: (1..4).. ", 
+            format!("{}{}{}\nEnter effect type: (1..3).. ", 
                 pad_right(format!("1: Damage (Cost: {})", display_effect_cost(cost_from_effect(Effect::Damage(0), budget, &card.range, &card.config))), PADDING, ' '),
                 pad_right(format!("2: Heal (Cost: {})", display_effect_cost(cost_from_effect(Effect::Heal(0), budget, &card.range, &card.config))), PADDING, ' '),
                 pad_right(format!("3: Acid Healing (Cost: {})", display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget, &card.range, &card.config))), PADDING, ' '),
@@ -103,20 +103,20 @@ pub fn get_rarity() -> Rarity {
         5,
         String::from(
             format!("{}{}{}{}{}\nEnter rarity: (1..5).. ",
-                pad_right("1: Bad".into(), PADDING, ' '),
-                pad_right("2: Not Great".into(), PADDING, ' '),
-                pad_right("3: Normal".into(), PADDING, ' '),
-                pad_right("4: Good".into(), PADDING, ' '),
-                pad_right("5: Great".into(), PADDING, ' '),
+                pad_right("1: Common".into(), PADDING, ' '),
+                pad_right("2: Uncommon".into(), PADDING, ' '),
+                pad_right("3: Rare".into(), PADDING, ' '),
+                pad_right("4: Epic".into(), PADDING, ' '),
+                pad_right("5: Legendary".into(), PADDING, ' '),
             )),
     ) - 1i32
     {
-        0 => Rarity::Bad,
-        1 => Rarity::NotGreat,
-        2 => Rarity::Normal,
-        3 => Rarity::Good,
-        4 => Rarity::Great,
-        _ => Rarity::Bad,
+        0 => Rarity::Common,
+        1 => Rarity::Uncommon,
+        2 => Rarity::Rare,
+        3 => Rarity::Epic,
+        4 => Rarity::Legendary,
+        _ => Rarity::Common,
     }
 }
 

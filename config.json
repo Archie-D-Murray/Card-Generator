@@ -31,8 +31,8 @@
   "heal_range_modifiers": {
     "single": 1.0,
     "multiple": 2.0,
-    "aoe": 1.5,
-    "aoe_extended": 1.25
+    "aoe": 1.25,
+    "aoe_extended": 1.5
   },
   "acid_heal_range_modifiers": {
     "single": 1.0,

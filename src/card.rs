@@ -1,4 +1,92 @@
+use std::{fs::OpenOptions, io::{Read, Write}};
+
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct DeckInputs {
+    epic:   CardInput,
+    rare: CardInput,
+    uncommon_first:  CardInput,
+    uncommon_second:  CardInput,
+    common:  CardInput
+}
+
+impl DeckInputs {
+    pub fn get_inputs(&self) -> [CardInput; 5] {
+        [
+            self.epic.clone(),
+            self.rare.clone(),
+            self.uncommon_first.clone(),
+            self.uncommon_second.clone(),
+            self.common.clone(),
+        ]
+    }
+}
+
+impl Default for DeckInputs {
+    fn default() -> Self {
+        DeckInputs { 
+            epic:   CardInput::default(),
+            rare: CardInput::default(),
+            uncommon_first:  CardInput::default(),
+            uncommon_second:  CardInput::default(),
+            common:  CardInput::default(),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct CardInput {
+    pub name: String,
+    pub rarity: i32,
+    pub efficiency: i32,
+    pub effect_share: f32,
+    pub range: i32,
+    pub effect: i32,
+}
+
+impl Default for CardInput {
+    fn default() -> Self {
+        CardInput { name: String::from("Test"), rarity: 0, efficiency: 0, effect_share: 0.0, range: 0, effect: 0 }
+    }
+}
+
+impl CardInput { 
+    pub fn get_rarity(&self) -> Rarity {
+        match self.rarity {
+            4 => Rarity::Legendary,
+            3 => Rarity::Epic,
+            2 => Rarity::Rare,
+            1 => Rarity::Uncommon,
+            _ => Rarity::Common,
+        }
+    }
+
+    pub fn get_efficiency(&self) -> Efficiency {
+        match self.efficiency {
+            2 => Efficiency::Good,
+            1 => Efficiency::Normal,
+            _ => Efficiency::Bad
+        }
+    }
+
+    pub fn get_range(&self) -> Range {
+        match self.range {
+            3 => Range::ExtendedAoE,
+            2 => Range::AoE,
+            1 => Range::Multiple,
+            _ => Range::Single,
+        }
+    }
+
+    pub fn get_effect(&self) -> Effect {
+        match self.effect {
+            2 => Effect::AcidHeal(0),
+            1 => Effect::Heal(0),
+            _ => Effect::Damage(0),
+        }
+    }
+}
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct RarityRanges {
@@ -52,6 +140,26 @@ impl Config {
     }
 }
 
+pub fn load_config() -> Config {
+    let mut config_file = OpenOptions::new().read(true).write(true).create(true).open(crate::PATH).expect("Could not load file!");
+    let mut contents = String::new();
+    config_file.read_to_string(&mut contents).expect("Could not read file!");
+    let (config, config_empty) = if contents.trim().is_empty() {
+        (Config::default(), true)
+    } else {
+        match serde_json::from_str(contents.as_str()) {
+            Ok(deserialize) => (deserialize, false),
+            Err(_) => {
+                let _ = config_file.set_len(0); (Config::default(), true) 
+            }
+        }
+    };
+    if config_empty {
+        let _ = config_file.write_all(serde_json::to_string_pretty(&config).unwrap().as_bytes());
+    }
+    config
+}
+
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct RangeModifiers {
     pub single: f32,
@@ -98,20 +206,20 @@ pub fn apply_multiplier(value: i32, multiplier: f32) -> i32 {
 
 #[derive(Debug, Clone)]
 pub enum Rarity {
-    Bad,
-    NotGreat,
-    Normal,
-    Good,
-    Great,
+    Common,
+    Uncommon,
+    Rare,
+    Epic,
+    Legendary,
 }
 
 pub fn cost_from_rarity(rarity: &Rarity, config: &Config) -> Vec<i32> {
     match rarity {
-        Rarity::Bad => config.rarity_ranges.bad.to_vec(),
-        Rarity::NotGreat => config.rarity_ranges.not_great.to_vec(),
-        Rarity::Normal => config.rarity_ranges.normal.to_vec(),
-        Rarity::Good => config.rarity_ranges.good.to_vec(),
-        Rarity::Great => config.rarity_ranges.great.to_vec(),
+        Rarity::Common => config.rarity_ranges.bad.to_vec(),
+        Rarity::Uncommon => config.rarity_ranges.not_great.to_vec(),
+        Rarity::Rare => config.rarity_ranges.normal.to_vec(),
+        Rarity::Epic => config.rarity_ranges.good.to_vec(),
+        Rarity::Legendary => config.rarity_ranges.great.to_vec(),
     }
 }
 
