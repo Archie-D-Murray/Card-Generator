@@ -4,7 +4,7 @@ version = 3
 
 [[package]]
 name = "card-generator"
-version = "2.1.2"
+version = "3.0.0"
 dependencies = [
  "rand",
  "serde",

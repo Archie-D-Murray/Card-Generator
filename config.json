@@ -1,49 +1,43 @@
 {
   "rarity_ranges": {
     "bad": [
-      2,
-      2
-    ],
-    "not_great": [
-      3,
+      4,
       4
     ],
-    "normal": [
+    "not_great": [
       5,
-      6
-    ],
-    "good": [
-      7,
       8
     ],
+    "normal": [
+      10,
+      12
+    ],
+    "good": [
+      14,
+      16
+    ],
     "great": [
-      9,
-      10
+      18,
+      20
     ]
   },
   "power_to_priority": 1.0,
   "damage_range_modifiers": {
     "single": 1.0,
-    "multiple": 1.0,
-    "aoe": 1.0,
-    "aoe_extended": 1.0
+    "multiple": 1.25,
+    "aoe": 0.75,
+    "aoe_extended": 0.66
   },
   "heal_range_modifiers": {
     "single": 1.0,
-    "multiple": 1.0,
-    "aoe": 1.0,
-    "aoe_extended": 1.0
-  },
-  "dot_range_modifiers": {
-    "single": 1.0,
-    "multiple": 1.0,
-    "aoe": 1.0,
-    "aoe_extended": 1.0
+    "multiple": 2.0,
+    "aoe": 1.5,
+    "aoe_extended": 1.25
   },
   "acid_heal_range_modifiers": {
     "single": 1.0,
-    "multiple": 1.0,
-    "aoe": 1.0,
-    "aoe_extended": 1.0
+    "multiple": 1.25,
+    "aoe": 1.75,
+    "aoe_extended": 2.0
   }
 }

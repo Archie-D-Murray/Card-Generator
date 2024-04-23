@@ -43,22 +43,17 @@ pub fn get_effect(budget: i32, card: &Card) -> Effect {
         1,
         4,
         String::from(
-            format!("{}{}{}{}\nEnter effect type: (1..4).. ", 
+            format!("{}{}{}\nEnter effect type: (1..4).. ", 
                 pad_right(format!("1: Damage (Cost: {})", display_effect_cost(cost_from_effect(Effect::Damage(0), budget, &card.range, &card.config))), PADDING, ' '),
                 pad_right(format!("2: Heal (Cost: {})", display_effect_cost(cost_from_effect(Effect::Heal(0), budget, &card.range, &card.config))), PADDING, ' '),
-                pad_right(format!( "3: DoT (Cost: {} x turn duration)", display_effect_cost(cost_from_effect(Effect::DoT(0, 2), budget, &card.range, &card.config))), PADDING, ' '),
-                pad_right(format!("4: Acid Healing (Cost: {})", display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget, &card.range, &card.config))), PADDING, ' '),
+                pad_right(format!("3: Acid Healing (Cost: {})", display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget, &card.range, &card.config))), PADDING, ' '),
             )
         ),
     ) - 1;
     match effect_type {
         0 => Effect::Damage(0),
         1 => Effect::Heal(0),
-        2 => {
-            let turns: i32 = get_num(2, 4, String::from("\tEnter turn duration (2..4):\t"));
-            Effect::DoT(0, turns)
-        }
-        3 => Effect::AcidHeal(0),
+        2 => Effect::AcidHeal(0),
         _ => Effect::Damage(0),
     }
 }
@@ -69,10 +64,10 @@ pub fn get_range() -> Range {
         4,
         String::from(
             format!("{}{}{}{}\nEnter range type: (1..4).. ",
-                pad_right(format!("1: Single (Cost: {})", cost_from_range(Range::Single)), PADDING, ' '),
-                pad_right(format!("2: Multiple (2) (Cost: {})", cost_from_range(Range::Multiple)), PADDING, ' '),
-                pad_right(format!("3: AoE (room) (Cost: {})", cost_from_range(Range::AoE)), PADDING, ' '),
-                pad_right(format!("4: AoE (Extended) (Cost: {})", cost_from_range(Range::ExtendedAoE)), PADDING, ' '),
+                pad_right(format!("1: Single (Cost: {})", cost_from_range(&Range::Single)), PADDING, ' '),
+                pad_right(format!("2: Multiple (2) (Cost: {})", cost_from_range(&Range::Multiple)), PADDING, ' '),
+                pad_right(format!("3: AoE (room) (Cost: {})", cost_from_range(&Range::AoE)), PADDING, ' '),
+                pad_right(format!("4: AoE (Extended) (Cost: {})", cost_from_range(&Range::ExtendedAoE)), PADDING, ' '),
             )
         )) - 1i32 {
         0 => Range::Single,

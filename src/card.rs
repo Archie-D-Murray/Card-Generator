@@ -27,7 +27,6 @@ pub struct Config {
     pub power_to_priority: f32,
     pub damage_range_modifiers: RangeModifiers,
     pub heal_range_modifiers: RangeModifiers,
-    pub dot_range_modifiers: RangeModifiers,
     pub acid_heal_range_modifiers: RangeModifiers,
 }
 
@@ -38,7 +37,6 @@ impl Default for Config {
             power_to_priority: 1.0,
             damage_range_modifiers: RangeModifiers::default(),
             heal_range_modifiers: RangeModifiers::default(),
-            dot_range_modifiers: RangeModifiers::default(),
             acid_heal_range_modifiers: RangeModifiers::default(),
         }
     }
@@ -50,7 +48,6 @@ impl Config {
             Effect::Heal(_) => self.heal_range_modifiers.get_modifier(range),
             Effect::AcidHeal(_) => self.acid_heal_range_modifiers.get_modifier(range),
             Effect::Damage(_) => self.damage_range_modifiers.get_modifier(range),
-            Effect::DoT(_, _) => self.dot_range_modifiers.get_modifier(range),
         }
     }
 }
@@ -137,38 +134,15 @@ pub enum Effect {
     Heal(i32),
     AcidHeal(i32),
     Damage(i32),
-    DoT(i32, i32),
 }
 
 pub fn cost_from_effect(effect: Effect, budget: i32, range: &Option<Range>, config: &Config) -> (Option<Effect>, i32) {
     let effect_modifier = config.get_effect_range_modifier(&effect, &range.as_ref().expect("No Range in card... How?"));
     let budget = apply_multiplier(budget, 1.0 / effect_modifier);
     match effect {
-        Effect::Heal(_) => {
-            let amount = (budget as f32 / 1.5).floor() as i32;
-            if amount > 0 {
-                (Some(Effect::Heal(amount)), (amount as f32 * 1.5).floor() as i32)
-            } else {
-                (None, apply_multiplier(budget, effect_modifier))
-            }
-        },
-        Effect::AcidHeal(_) => {
-            let amount = apply_multiplier(budget, 1.0 / 1.75);
-            if amount > 0 {
-                (Some(Effect::AcidHeal(amount)), apply_multiplier(amount, 1.75 + effect_modifier))
-            } else {
-                (None, apply_multiplier(budget, effect_modifier))
-            }
-        },
+        Effect::Heal(_) => (Some(Effect::Heal(budget)), apply_multiplier(budget, effect_modifier)),
+        Effect::AcidHeal(_) => (Some(Effect::AcidHeal(budget)), apply_multiplier(budget, effect_modifier)),
         Effect::Damage(_) => (Some(Effect::Damage(budget)), apply_multiplier(budget, effect_modifier)),
-        Effect::DoT(_, duration) => {
-            let tick = budget / duration;
-            if tick > 0 {
-                (Some(Effect::DoT(tick, duration)), apply_multiplier(tick * duration, effect_modifier))
-            } else {
-                (None, apply_multiplier(budget, effect_modifier))
-            }
-        }
     }
 }
 
@@ -180,7 +154,7 @@ pub enum Range {
     ExtendedAoE,
 }
 
-pub fn cost_from_range(range: Range) -> i32 {
+pub fn cost_from_range(range: &Range) -> i32 {
     match range {
         Range::Single => 0,
         Range::Multiple => 1,
@@ -193,6 +167,7 @@ pub fn cost_from_range(range: Range) -> i32 {
 pub struct Card {
     pub name: String,
     pub budget: i32,
+    pub efficiency: f32,
     pub priority: u32,
     pub barnacles: i32,
     pub rarity: Rarity,
@@ -220,15 +195,17 @@ pub fn priority_from_budget(budget: i32, config: &Config) -> i32 {
 impl Card {
     pub fn new(name: String, rarity: Rarity, efficiency: Efficiency, effect_share: f32, config: Config) -> Card {
         let range = cost_from_rarity(&rarity, &config);
+        let efficiency = multiplier_from_efficiency(&efficiency);
         let mut rng = rand::thread_rng();
         let rarity_value = range[rng.gen_range(0..range.len())];
-        let budget = apply_multiplier(rarity_value, multiplier_from_efficiency(&efficiency));
+        let budget = apply_multiplier(rarity_value, efficiency);
         Card {
             name,
             budget,
             rarity,
             priority: DEFAULT_PRIORITY,
-            barnacles: apply_multiplier(rarity_value, 1.0 / multiplier_from_efficiency(&efficiency)),
+            efficiency,
+            barnacles: 100000000,
             budget_share: (effect_share, 1.0 - effect_share),
             range: None,
             effect: None,
@@ -237,7 +214,7 @@ impl Card {
     }
 
     pub fn with_range(&mut self, range: Range) -> &mut Card {
-        let cost = cost_from_range(range.clone());
+        let cost = cost_from_range(&range);
         self.range = Some(range);
         self.budget -= cost;
         self
@@ -264,6 +241,7 @@ impl Card {
 
     pub fn build(&mut self) -> Result<Card, String> {
         self.priority -= priority_from_budget(self.budget, &self.config) as u32;
+        self.barnacles = get_barnacles(self);
         if self.priority == DEFAULT_PRIORITY || self.barnacles == 0 {
             Err(String::from(format!(
                 "Card prio {} due to budget: {}",
@@ -272,5 +250,19 @@ impl Card {
         } else {
             Ok(self.clone())
         }
+    }
+}
+
+fn get_barnacles(card: &Card) -> i32 {
+    // Formula = magnitude_of_effect * effect_type + range_modifier / efficiency
+    apply_multiplier(barnacles_from_effect(&card.effect) + cost_from_range(&card.range.as_ref().unwrap_or(&Range::Single)), 1.0 / card.efficiency)
+}
+
+fn barnacles_from_effect(effect: &Option<Effect>) -> i32 {
+    if effect.as_ref().is_none() { return 100000000; }
+    match effect.as_ref().unwrap() {
+        Effect::Heal(magnitude) => apply_multiplier(*magnitude, 1.25),
+        Effect::AcidHeal(magnitude) => apply_multiplier(*magnitude, 1.125),
+        Effect::Damage(magnitude) => *magnitude,
     }
 }
