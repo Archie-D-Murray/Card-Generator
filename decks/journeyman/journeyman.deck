@@ -1,16 +1,16 @@
 {
   "inputs": [
     {
-      "name": "Epic",
+      "name": "Epic Damage",
       "rarity": {
         "type": "Epic"
       },
       "efficiency": {
-        "type": "Bad"
+        "type": "Good"
       },
-      "effect_share": 0.0,
+      "effect_share": 0.9,
       "range": {
-        "type": "Single"
+        "type": "ExtendedAoE"
       },
       "effect": {
         "type": "Damage",
@@ -18,50 +18,50 @@
       }
     },
     {
-      "name": "Epic",
+      "name": "Epic Acid Heal",
       "rarity": {
         "type": "Epic"
       },
       "efficiency": {
-        "type": "Bad"
+        "type": "Normal"
       },
-      "effect_share": 0.0,
+      "effect_share": 0.75,
       "range": {
         "type": "Single"
       },
       "effect": {
-        "type": "Damage",
+        "type": "AcidHeal",
         "magnitude": 0
       }
     },
     {
-      "name": "Rare",
+      "name": "Rare Heal",
       "rarity": {
         "type": "Rare"
       },
       "efficiency": {
-        "type": "Bad"
+        "type": "Good"
       },
-      "effect_share": 0.0,
+      "effect_share": 0.5,
       "range": {
         "type": "Single"
       },
       "effect": {
-        "type": "Damage",
+        "type": "Heal",
         "magnitude": 0
       }
     },
     {
-      "name": "Rare",
+      "name": "Rare Damage",
       "rarity": {
         "type": "Rare"
       },
       "efficiency": {
-        "type": "Bad"
+        "type": "Normal"
       },
-      "effect_share": 0.0,
+      "effect_share": 0.8,
       "range": {
-        "type": "Single"
+        "type": "Multiple"
       },
       "effect": {
         "type": "Damage",
@@ -69,19 +69,19 @@
       }
     },
     {
-      "name": "Uncommon",
+      "name": "Uncommon Heal",
       "rarity": {
         "type": "Uncommon"
       },
       "efficiency": {
-        "type": "Bad"
+        "type": "Good"
       },
-      "effect_share": 0.0,
+      "effect_share": 0.5,
       "range": {
         "type": "Single"
       },
       "effect": {
-        "type": "Damage",
+        "type": "Heal",
         "magnitude": 0
       }
     }
