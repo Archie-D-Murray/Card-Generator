@@ -2,35 +2,51 @@ use std::{fs::OpenOptions, io::{Read, Write}};
 
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Clone, Default)]
+pub enum DeckType {
+    #[default]
+    Starter,
+    Journeyman,
+    Legendary
+}
+
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct DeckInputs {
-    epic:   CardInput,
-    rare: CardInput,
-    uncommon_first:  CardInput,
-    uncommon_second:  CardInput,
-    common:  CardInput
+    pub inputs: [CardInput; 5]
 }
 
 impl DeckInputs {
-    pub fn get_inputs(&self) -> [CardInput; 5] {
-        [
-            self.epic.clone(),
-            self.rare.clone(),
-            self.uncommon_first.clone(),
-            self.uncommon_second.clone(),
-            self.common.clone(),
-        ]
-    }
-}
-
-impl Default for DeckInputs {
-    fn default() -> Self {
-        DeckInputs { 
-            epic:   CardInput::default(),
-            rare: CardInput::default(),
-            uncommon_first:  CardInput::default(),
-            uncommon_second:  CardInput::default(),
-            common:  CardInput::default(),
+    pub fn new(deck_type: DeckType) -> Self {
+        DeckInputs {
+            inputs: match deck_type {
+                DeckType::Starter => {
+                    [
+                        CardInput::new(Rarity::Epic),
+                        CardInput::new(Rarity::Rare),
+                        CardInput::new(Rarity::Uncommon),
+                        CardInput::new(Rarity::Uncommon),
+                        CardInput::new(Rarity::Common),
+                    ]
+                },
+                DeckType::Journeyman => {
+                    [
+                        CardInput::new(Rarity::Epic),
+                        CardInput::new(Rarity::Epic),
+                        CardInput::new(Rarity::Rare),
+                        CardInput::new(Rarity::Rare),
+                        CardInput::new(Rarity::Uncommon),
+                    ]
+                },
+                DeckType::Legendary => {
+                    [
+                        CardInput::new(Rarity::Legendary),
+                        CardInput::new(Rarity::Epic),
+                        CardInput::new(Rarity::Epic),
+                        CardInput::new(Rarity::Uncommon),
+                        CardInput::new(Rarity::Rare),
+                    ]
+                },
+            }
         }
     }
 }
@@ -38,74 +54,75 @@ impl Default for DeckInputs {
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct CardInput {
     pub name: String,
-    pub rarity: i32,
-    pub efficiency: i32,
+    pub rarity: Rarity,
+    pub efficiency: Efficiency,
     pub effect_share: f32,
-    pub range: i32,
-    pub effect: i32,
+    pub range: Range,
+    pub effect: Effect,
 }
 
-impl Default for CardInput {
-    fn default() -> Self {
-        CardInput { name: String::from("Test"), rarity: 0, efficiency: 0, effect_share: 0.0, range: 0, effect: 0 }
-    }
-}
-
-impl CardInput { 
-    pub fn get_rarity(&self) -> Rarity {
-        match self.rarity {
-            4 => Rarity::Legendary,
-            3 => Rarity::Epic,
-            2 => Rarity::Rare,
-            1 => Rarity::Uncommon,
-            _ => Rarity::Common,
-        }
-    }
-
-    pub fn get_efficiency(&self) -> Efficiency {
-        match self.efficiency {
-            2 => Efficiency::Good,
-            1 => Efficiency::Normal,
-            _ => Efficiency::Bad
-        }
-    }
-
-    pub fn get_range(&self) -> Range {
-        match self.range {
-            3 => Range::ExtendedAoE,
-            2 => Range::AoE,
-            1 => Range::Multiple,
-            _ => Range::Single,
-        }
-    }
-
-    pub fn get_effect(&self) -> Effect {
-        match self.effect {
-            2 => Effect::AcidHeal(0),
-            1 => Effect::Heal(0),
-            _ => Effect::Damage(0),
+impl CardInput {
+    fn new(rarity: Rarity) -> Self {
+        CardInput { 
+            name: format!("{:?}", rarity), 
+            rarity, 
+            efficiency: Efficiency::Bad, 
+            effect_share: 0.0, 
+            range: Range::Single, 
+            effect: Effect::Damage(0) 
         }
     }
 }
 
 #[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct RarityRanges {
-    pub bad: [i32; 2],
-    pub not_great: [i32; 2],
-    pub normal: [i32; 2],
-    pub good: [i32; 2],
-    pub great: [i32; 2],
+   pub common: PowerRange,
+    pub uncommon: PowerRange,
+    pub rare: PowerRange,
+    pub epic: PowerRange,
+    pub legendary: PowerRange 
+}
+
+impl RarityRanges {
+    pub fn get_power(&self, rng: &mut ThreadRng, rarity: &Rarity) -> i32 {
+        match rarity {
+            Rarity::Common => self.common.get(rng),
+            Rarity::Uncommon => self.uncommon.get(rng),
+            Rarity::Rare => self.rare.get(rng),
+            Rarity::Epic => self.epic.get(rng),
+            Rarity::Legendary => self.legendary.get(rng),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct PowerRange {
+    pub min: i32,
+    pub max: i32,
+}
+
+impl PowerRange {
+    pub fn new(min: i32, max: i32) -> Self {
+        PowerRange { min, max }
+    }
+
+    pub fn get(&self, rng: &mut ThreadRng) -> i32 {
+        if rng.gen_bool(0.5) {
+            self.min
+        } else {
+            self.max
+        }
+    }
 }
 
 impl Default for RarityRanges {
     fn default() -> Self {
-        RarityRanges {
-            bad: [2, 2],
-            not_great: [3, 4],
-            normal: [5, 6],
-            good: [7, 8],
-            great: [9, 10]
-        }
+        RarityRanges { 
+            common:     PowerRange::new(4,   4), 
+            uncommon:   PowerRange::new(5,   8), 
+            rare:       PowerRange::new(10, 12), 
+            epic:       PowerRange::new(14, 16), 
+            legendary:  PowerRange::new(18, 20) }
     }
 }
 
@@ -120,7 +137,13 @@ pub struct RarityPriorityModifiers {
 
 impl Default for RarityPriorityModifiers {
     fn default() -> Self {
-        RarityPriorityModifiers { common: 2.0, uncommon: 1.75, rare: 1.5, epic: 1.25, legendary: 1.0 }
+        RarityPriorityModifiers { 
+            common: 4.0, 
+            uncommon: 3.5, 
+            rare: 1.75, 
+            epic: 1.5, 
+            legendary: 0.75 
+        }
     }
 }
 
@@ -150,9 +173,9 @@ impl Default for Config {
         Config {
             rarity_ranges: RarityRanges::default(),
             power_to_priority: RarityPriorityModifiers::default(),
-            damage_range_modifiers: RangeModifiers::default(),
-            heal_range_modifiers: RangeModifiers::default(),
-            acid_heal_range_modifiers: RangeModifiers::default(),
+            damage_range_modifiers: RangeModifiers::new(Effect::Damage(0)),
+            heal_range_modifiers: RangeModifiers::new(Effect::Heal(0)),
+            acid_heal_range_modifiers: RangeModifiers::new(Effect::AcidHeal(0)),
         }
     }
 }
@@ -177,7 +200,9 @@ pub fn load_config() -> Config {
         match serde_json::from_str(contents.as_str()) {
             Ok(deserialize) => (deserialize, false),
             Err(_) => {
-                let _ = config_file.set_len(0); (Config::default(), true) 
+                let _ = config_file.set_len(0); 
+                let _ = config_file.flush();
+                (Config::default(), true) 
             }
         }
     };
@@ -204,6 +229,14 @@ impl RangeModifiers {
             Range::ExtendedAoE => self.aoe_extended,
         }
     }
+
+    pub fn new(effect: Effect) -> Self {
+        match effect {
+            Effect::Damage(_) => RangeModifiers { single: 1.0, multiple: 1.25, aoe: 0.875, aoe_extended: 0.75 },
+            Effect::Heal(_) => RangeModifiers { single: 1.0, multiple: 2.0, aoe: 1.25, aoe_extended: 1.5 },
+            Effect::AcidHeal(_) => RangeModifiers { single: 1.0, multiple: 1.25, aoe: 1.75, aoe_extended: 2.0 },
+        }
+    }
 }
 
 impl Default for RangeModifiers {
@@ -212,7 +245,7 @@ impl Default for RangeModifiers {
     }
 }
 
-use rand::Rng;
+use rand::{rngs::ThreadRng, Rng};
 
 pub const DEFAULT_PRIORITY: u32 = 11;
 pub const PADDING: usize = 36;
@@ -231,7 +264,8 @@ pub fn apply_multiplier(value: i32, multiplier: f32) -> i32 {
     (value as f32 * multiplier).floor() as i32
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(tag = "type")]
 pub enum Rarity {
     Common,
     Uncommon,
@@ -240,16 +274,8 @@ pub enum Rarity {
     Legendary,
 }
 
-pub fn cost_from_rarity(rarity: &Rarity, config: &Config) -> Vec<i32> {
-    match rarity {
-        Rarity::Common => config.rarity_ranges.bad.to_vec(),
-        Rarity::Uncommon => config.rarity_ranges.not_great.to_vec(),
-        Rarity::Rare => config.rarity_ranges.normal.to_vec(),
-        Rarity::Epic => config.rarity_ranges.good.to_vec(),
-        Rarity::Legendary => config.rarity_ranges.great.to_vec(),
-    }
-}
-
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub enum Efficiency {
     Bad,
     Normal,
@@ -264,7 +290,8 @@ fn multiplier_from_efficiency(efficiency: &Efficiency) -> f32 {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type", content = "magnitude")]
 pub enum Effect {
     Heal(i32),
     AcidHeal(i32),
@@ -281,7 +308,8 @@ pub fn cost_from_effect(effect: Effect, budget: i32, range: &Option<Range>, conf
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub enum Range {
     Single,
     Multiple,
@@ -329,14 +357,11 @@ pub fn priority_from_budget(budget: i32, rarity: &Rarity, config: &Config) -> i3
 
 impl Card {
     pub fn new(name: String, rarity: Rarity, efficiency: Efficiency, effect_share: f32, config: Config) -> Card {
-        let range = cost_from_rarity(&rarity, &config);
         let efficiency = multiplier_from_efficiency(&efficiency);
         let mut rng = rand::thread_rng();
-        let rarity_value = range[rng.gen_range(0..range.len())];
-        let budget = apply_multiplier(rarity_value, efficiency);
         Card {
-            name,
-            budget,
+            name, 
+            budget: apply_multiplier(config.rarity_ranges.get_power(&mut rng, &rarity), efficiency),
             rarity,
             priority: DEFAULT_PRIORITY,
             efficiency,

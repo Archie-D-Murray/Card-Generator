@@ -1,16 +1,16 @@
 {
   "inputs": [
     {
-      "name": "Epic Damage",
+      "name": "Epic",
       "rarity": {
         "type": "Epic"
       },
       "efficiency": {
-        "type": "Good"
+        "type": "Bad"
       },
-      "effect_share": 0.8,
+      "effect_share": 0.0,
       "range": {
-        "type": "AoE"
+        "type": "Single"
       },
       "effect": {
         "type": "Damage",
@@ -18,31 +18,14 @@
       }
     },
     {
-      "name": "Rare Acid Heal",
+      "name": "Rare",
       "rarity": {
         "type": "Rare"
       },
       "efficiency": {
         "type": "Bad"
       },
-      "effect_share": 0.75,
-      "range": {
-        "type": "Multiple"
-      },
-      "effect": {
-        "type": "AcidHeal",
-        "magnitude": 0
-      }
-    },
-    {
-      "name": "Uncommon Damage",
-      "rarity": {
-        "type": "Uncommon"
-      },
-      "efficiency": {
-        "type": "Good"
-      },
-      "effect_share": 0.8,
+      "effect_share": 0.0,
       "range": {
         "type": "Single"
       },
@@ -52,36 +35,53 @@
       }
     },
     {
-      "name": "Uncommon Heal",
+      "name": "Uncommon",
       "rarity": {
         "type": "Uncommon"
       },
       "efficiency": {
-        "type": "Good"
+        "type": "Bad"
       },
-      "effect_share": 0.75,
+      "effect_share": 0.0,
       "range": {
         "type": "Single"
       },
       "effect": {
-        "type": "Heal",
+        "type": "Damage",
         "magnitude": 0
       }
     },
     {
-      "name": "Common Acid Heal",
+      "name": "Uncommon",
       "rarity": {
-        "type": "Common"
+        "type": "Uncommon"
       },
       "efficiency": {
-        "type": "Good"
+        "type": "Bad"
       },
-      "effect_share": 0.75,
+      "effect_share": 0.0,
       "range": {
         "type": "Single"
       },
       "effect": {
-        "type": "AcidHeal",
+        "type": "Damage",
+        "magnitude": 0
+      }
+    },
+    {
+      "name": "Common",
+      "rarity": {
+        "type": "Common"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "effect_share": 0.0,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "Damage",
         "magnitude": 0
       }
     }

@@ -1,31 +1,31 @@
 {
   "rarity_ranges": {
-    "bad": [
-      4,
-      4
-    ],
-    "not_great": [
-      5,
-      8
-    ],
-    "normal": [
-      10,
-      12
-    ],
-    "good": [
-      14,
-      16
-    ],
-    "great": [
-      18,
-      20
-    ]
+    "common": {
+      "min": 4,
+      "max": 4
+    },
+    "uncommon": {
+      "min": 5,
+      "max": 8
+    },
+    "rare": {
+      "min": 10,
+      "max": 12
+    },
+    "epic": {
+      "min": 14,
+      "max": 16
+    },
+    "legendary": {
+      "min": 18,
+      "max": 20
+    }
   },
   "power_to_priority": {
     "common": 4.0,
     "uncommon": 3.5,
     "rare": 1.75,
-    "epic": 1.0,
+    "epic": 1.5,
     "legendary": 0.75
   },
   "damage_range_modifiers": {
@@ -45,5 +45,5 @@
     "multiple": 1.25,
     "aoe": 1.75,
     "aoe_extended": 2.0
-  } 
+  }
 }

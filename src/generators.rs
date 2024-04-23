@@ -56,16 +56,16 @@ pub fn generate_deck(deck_name_opt: Option<String>, config: Config) {
         return;
     }
     let Ok(deck) = serde_json::from_str::<DeckInputs>(deck_buf.as_str()) else { println!("Could not parse deck!"); return; };
-    for card_input in deck.get_inputs() {
+    for card_input in deck.inputs {
         let card_result = Card::new(
                 card_input.name.clone(), 
-                card_input.get_rarity(), 
-                card_input.get_efficiency(), 
+                card_input.rarity, 
+                card_input.efficiency, 
                 card_input.effect_share, 
                 config.clone()
             )
-            .with_range(card_input.get_range())
-            .with_effect(card_input.get_effect())
+            .with_range(card_input.range)
+            .with_effect(card_input.effect)
             .build();
         if let Ok(card) = card_result {
             let Ok(mut card_file) = options
@@ -82,8 +82,13 @@ pub fn generate_deck(deck_name_opt: Option<String>, config: Config) {
 }
 
 pub fn generate_deck_file() {
-    let mut file = OpenOptions::new().write(true).create(true).open("Deck_Template.json").expect("Could not create template");
+    let deck_type = match get_num(1, 3, String::from("1: Starter\n2: Journeyman\n3: Legendary\nEnter deck type (1..3)... ")) - 1 {
+        2 => DeckType::Legendary,
+        1 => DeckType::Journeyman,
+        _ => DeckType::Starter,
+    };
+    let mut file = OpenOptions::new().write(true).create(true).open(format!("{:?} Template.json", deck_type).as_str()).expect("Could not create template");
     file.set_len(0).expect("File could not be modified!");
-    let deck = DeckInputs::default();
+    let deck = DeckInputs::new(deck_type);
     file.write_all(serde_json::to_string_pretty(&deck).expect("Bad type").as_bytes()).expect("Could not write to file!");
 }
