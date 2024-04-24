@@ -56,21 +56,30 @@ pub struct CardInput {
     pub name: String,
     pub rarity: Rarity,
     pub efficiency: Efficiency,
-    pub effect_share: f32,
+    pub priority_allocation: i32,
     pub range: Range,
     pub effect: Effect,
 }
 
 impl CardInput {
-    fn new(rarity: Rarity) -> Self {
+    pub fn new(rarity: Rarity) -> Self {
         CardInput { 
             name: format!("{:?}", rarity), 
             rarity, 
             efficiency: Efficiency::Bad, 
-            effect_share: 0.0, 
+            priority_allocation: 1, 
             range: Range::Single, 
             effect: Effect::Damage(0) 
         }
+    }
+
+    pub fn apply_configuration(&mut self, card: &Card) {
+        assert_eq!(self.rarity, card.rarity, "Error in configuration, rarity does not match!");
+        self.name = card.name.clone();
+        self.efficiency = card.efficiency.clone();
+        self.priority_allocation = card.priority_allocation;
+        self.range = card.range.as_ref().unwrap().clone();
+        self.effect = card.effect.as_ref().unwrap().clone();
     }
 }
 
@@ -264,7 +273,7 @@ pub fn apply_multiplier(value: i32, multiplier: f32) -> i32 {
     (value as f32 * multiplier).floor() as i32
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(tag = "type")]
 pub enum Rarity {
     Common,
@@ -330,11 +339,11 @@ pub fn cost_from_range(range: &Range) -> i32 {
 pub struct Card {
     pub name: String,
     pub budget: i32,
-    pub efficiency: f32,
+    pub efficiency: Efficiency,
     pub priority: u32,
     pub barnacles: i32,
     pub rarity: Rarity,
-    pub budget_share: (f32, f32),
+    pub priority_allocation: i32,
     pub range: Option<Range>,
     pub effect: Option<Effect>,
     pub config: Config
@@ -356,21 +365,26 @@ pub fn priority_from_budget(budget: i32, rarity: &Rarity, config: &Config) -> i3
 }
 
 impl Card {
-    pub fn new(name: String, rarity: Rarity, efficiency: Efficiency, effect_share: f32, config: Config) -> Card {
-        let efficiency = multiplier_from_efficiency(&efficiency);
+    pub fn new(name: String, rarity: Rarity, efficiency: Efficiency, config: Config) -> Card {
         let mut rng = rand::thread_rng();
         Card {
             name, 
-            budget: apply_multiplier(config.rarity_ranges.get_power(&mut rng, &rarity), efficiency),
+            budget: config.rarity_ranges.get_power(&mut rng, &rarity),
             rarity,
             priority: DEFAULT_PRIORITY,
             efficiency,
+            priority_allocation: 0,
             barnacles: 100000000,
-            budget_share: (effect_share, 1.0 - effect_share),
             range: None,
             effect: None,
             config
         }
+    }
+
+    pub fn with_priority_allocation(&mut self, priority_allocation: i32) -> &mut Card {
+        self.priority_allocation = priority_allocation;
+        self.budget -= priority_allocation;
+        self
     }
 
     pub fn with_range(&mut self, range: Range) -> &mut Card {
@@ -382,7 +396,7 @@ impl Card {
 
     pub fn with_effect(&mut self, effect: Effect) -> &mut Card {
         let (created_effect, used) =
-            cost_from_effect(effect, apply_multiplier(self.budget.max(0), self.budget_share.0), &self.range, &self.config);
+            cost_from_effect(effect, self.budget, &self.range, &self.config);
         self.budget -= used;
         self.effect = created_effect;
         self
@@ -390,6 +404,11 @@ impl Card {
 
     pub fn get_recast(&self) -> i32 {
         apply_multiplier(self.barnacles, 1.5)
+    }
+
+    pub fn print_budget_mut(&mut self) -> &mut Card {
+        println!("Card power budget: {}", self.budget);
+        self
     }
 
     pub fn to_string(&self) -> String {
@@ -415,7 +434,7 @@ impl Card {
 
 fn get_barnacles(card: &Card) -> i32 {
     // Formula = magnitude_of_effect * effect_type + range_modifier / efficiency
-    apply_multiplier(barnacles_from_effect(&card.effect) + cost_from_range(&card.range.as_ref().unwrap_or(&Range::Single)), 1.0 / card.efficiency)
+    apply_multiplier(barnacles_from_effect(&card.effect) + cost_from_range(&card.range.as_ref().unwrap_or(&Range::Single)), 1.0 / multiplier_from_efficiency(&card.efficiency))
 }
 
 fn barnacles_from_effect(effect: &Option<Effect>) -> i32 {

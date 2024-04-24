@@ -8,7 +8,7 @@
       "efficiency": {
         "type": "Good"
       },
-      "effect_share": 0.8,
+      "priority_allocation": 1,
       "range": {
         "type": "AoE"
       },
@@ -25,7 +25,7 @@
       "efficiency": {
         "type": "Bad"
       },
-      "effect_share": 0.75,
+      "priority_allocation": 2,
       "range": {
         "type": "Multiple"
       },
@@ -42,7 +42,7 @@
       "efficiency": {
         "type": "Good"
       },
-      "effect_share": 0.8,
+      "priority_allocation": 1,
       "range": {
         "type": "Single"
       },
@@ -59,7 +59,7 @@
       "efficiency": {
         "type": "Good"
       },
-      "effect_share": 0.75,
+      "priority_allocation": 2,
       "range": {
         "type": "Single"
       },
@@ -76,7 +76,7 @@
       "efficiency": {
         "type": "Good"
       },
-      "effect_share": 0.75,
+      "priority_allocation": 1,
       "range": {
         "type": "Single"
       },

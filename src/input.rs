@@ -26,8 +26,8 @@ where
     }
 }
 
-pub fn get_effect_share() -> f32 {
-    get_num(0.0, 1.0, String::from("Enter effect share: (0.0..1.0).. "))
+pub fn get_priority_allocation(card: &Card) -> i32 {
+    get_num(1, card.budget - 1, format!("Enter priority allocation ({}..{}): ", 1, card.budget - 1))
 }
 
 pub fn display_effect_cost(effect_data: (Option<Effect>, i32)) -> String {
@@ -38,7 +38,8 @@ pub fn display_effect_cost(effect_data: (Option<Effect>, i32)) -> String {
     }
 }
 
-pub fn get_effect(budget: i32, card: &Card) -> Effect {
+pub fn get_effect(card: &Card) -> Effect {
+    let budget = card.budget;
     let effect_type: i32 = get_num(
         1,
         3,
@@ -128,9 +129,19 @@ pub fn get_name() -> String {
     String::from(buf.trim())
 }
 
-pub fn get_card_base(name: &String, config: Config) -> Card {
-    let rarity = get_rarity();
-    let efficiency = get_efficiency();
-    let effect_share = get_effect_share();
-    Card::new(name.to_string(), rarity, efficiency, effect_share, config)
+pub fn get_string(prompt: String) -> String {
+    let mut buf = String::new();
+    print!("{}", prompt);
+    let _ = std::io::stdout().flush();
+    let _ = std::io::stdin().read_line(&mut buf);
+    String::from(buf.trim())
+}
+
+pub fn show_help() {
+    println!("Options:");
+    println!("--deck-template Generate a deck template \nWarning: must be placed in folder of the same name as the deck and the file renamed to <deck_name>.card all in the decks/ folder)");
+    println!("--deck-from-template Generates a deck from a template");
+    println!("--deck-generator: Interactive deck generation");
+    println!("--deck-examples: Generates example decks for all tiers");
+    println!("--generate-cards: Generate induvidual cards (written to cards/ folder)");
 }
