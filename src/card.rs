@@ -175,6 +175,7 @@ pub struct Config {
     pub damage_range_modifiers: RangeModifiers,
     pub heal_range_modifiers: RangeModifiers,
     pub acid_heal_range_modifiers: RangeModifiers,
+    pub shield_heal_range_modifiers: RangeModifiers,
 }
 
 impl Default for Config {
@@ -185,6 +186,7 @@ impl Default for Config {
             damage_range_modifiers: RangeModifiers::new(Effect::Damage(0)),
             heal_range_modifiers: RangeModifiers::new(Effect::Heal(0)),
             acid_heal_range_modifiers: RangeModifiers::new(Effect::AcidHeal(0)),
+            shield_heal_range_modifiers: RangeModifiers::new(Effect::Shield(0)),
         }
     }
 }
@@ -195,6 +197,7 @@ impl Config {
             Effect::Heal(_) => self.heal_range_modifiers.get_modifier(range),
             Effect::AcidHeal(_) => self.acid_heal_range_modifiers.get_modifier(range),
             Effect::Damage(_) => self.damage_range_modifiers.get_modifier(range),
+            Effect::Shield(_) => self.shield_heal_range_modifiers.get_modifier(range),
         }
     }
 }
@@ -242,8 +245,9 @@ impl RangeModifiers {
     pub fn new(effect: Effect) -> Self {
         match effect {
             Effect::Damage(_) => RangeModifiers { single: 1.0, multiple: 1.25, aoe: 0.875, aoe_extended: 0.75 },
-            Effect::Heal(_) => RangeModifiers { single: 1.0, multiple: 2.0, aoe: 1.25, aoe_extended: 1.5 },
-            Effect::AcidHeal(_) => RangeModifiers { single: 1.0, multiple: 1.25, aoe: 1.75, aoe_extended: 2.0 },
+            Effect::Heal(_) => RangeModifiers { single: 1.5, multiple: 2.0, aoe: 1.25, aoe_extended: 1.5 },
+            Effect::AcidHeal(_) => RangeModifiers { single: 1.25, multiple: 1.25, aoe: 1.75, aoe_extended: 2.0 },
+            Effect::Shield(_) => RangeModifiers { single: 1.5, multiple: 2.0, aoe: 1.25, aoe_extended: 1.5 },
         }
     }
 }
@@ -256,7 +260,7 @@ impl Default for RangeModifiers {
 
 use rand::{rngs::ThreadRng, Rng};
 
-pub const DEFAULT_PRIORITY: u32 = 11;
+pub const DEFAULT_PRIORITY: i32 = 11;
 pub const PADDING: usize = 36;
 
 pub fn pad_right(string: String, len: usize, whitespace_ch: char) -> String {
@@ -305,6 +309,18 @@ pub enum Effect {
     Heal(i32),
     AcidHeal(i32),
     Damage(i32),
+    Shield(i32),
+}
+
+impl Effect {
+    pub fn to_string(&self) -> String {
+        match self {
+            Effect::Heal(magnitude) => format!("Heal ({})", magnitude),
+            Effect::AcidHeal(magnitude) => format!("Acid Heal ({})", magnitude),
+            Effect::Damage(magnitude) => format!("Damage ({})", magnitude),
+            Effect::Shield(magnitude) => format!("Shield ({})", magnitude),
+        }
+    }
 }
 
 pub fn cost_from_effect(effect: Effect, budget: i32, range: &Option<Range>, config: &Config) -> (Option<Effect>, i32) {
@@ -314,6 +330,7 @@ pub fn cost_from_effect(effect: Effect, budget: i32, range: &Option<Range>, conf
         Effect::Heal(_) => (Some(Effect::Heal(budget)), apply_multiplier(budget, effect_modifier)),
         Effect::AcidHeal(_) => (Some(Effect::AcidHeal(budget)), apply_multiplier(budget, effect_modifier)),
         Effect::Damage(_) => (Some(Effect::Damage(budget)), apply_multiplier(budget, effect_modifier)),
+        Effect::Shield(_) => (Some(Effect::Shield(budget)), apply_multiplier(budget, effect_modifier)),
     }
 }
 
@@ -340,7 +357,7 @@ pub struct Card {
     pub name: String,
     pub budget: i32,
     pub efficiency: Efficiency,
-    pub priority: u32,
+    pub priority: i32,
     pub barnacles: i32,
     pub rarity: Rarity,
     pub priority_allocation: i32,
@@ -360,7 +377,7 @@ pub fn priority_from_budget(budget: i32, rarity: &Rarity, config: &Config) -> i3
     if budget < 0 {
         0
     } else {
-        (apply_multiplier(budget, config.power_to_priority.get_modifier(rarity)) + 1).min(DEFAULT_PRIORITY as i32)
+        (apply_multiplier(budget, config.power_to_priority.get_modifier(rarity))).clamp(1, DEFAULT_PRIORITY)
     }
 }
 
@@ -402,8 +419,8 @@ impl Card {
         self
     }
 
-    pub fn get_recast(&self) -> i32 {
-        apply_multiplier(self.barnacles, 1.5)
+    pub fn get_withdraw(&self) -> i32 {
+        apply_multiplier(self.barnacles, 1.0/3.0).max(1)
     }
 
     pub fn print_budget_mut(&mut self) -> &mut Card {
@@ -414,12 +431,12 @@ impl Card {
     pub fn to_string(&self) -> String {
         // Rarity, Effect, Cost, Recast Cost
         String::from(
-            format!("{}: \n\tPriority: {}\n\tRarity: {:?}\n\tCast: {} barnacles\n\tRecast: {} barnacles\n\tEffect: {:?}, Range: {:?}", self.name, self.priority, self.rarity, self.barnacles, self.get_recast(), self.effect.clone().unwrap(), self.range.clone().unwrap())
+            format!("{}: \n\tPriority: {}\n\tRarity: {:?}\n\tCast: {} barnacles\n\tWithdraw: {} barnacles\n\tEffect: {}, Range: {:?}", self.name, self.priority, self.rarity, self.barnacles, self.get_withdraw(), self.effect.clone().unwrap().to_string(), self.range.clone().unwrap())
         )
     }
 
     pub fn build(&mut self) -> Result<Card, String> {
-        self.priority -= priority_from_budget(self.budget, &self.rarity, &self.config) as u32;
+        self.priority -= priority_from_budget(self.priority_allocation, &self.rarity, &self.config);
         self.barnacles = get_barnacles(self);
         if self.priority == DEFAULT_PRIORITY || self.barnacles == 0 {
             Err(String::from(format!(
@@ -443,5 +460,6 @@ fn barnacles_from_effect(effect: &Option<Effect>) -> i32 {
         Effect::Heal(magnitude) => apply_multiplier(*magnitude, 1.25),
         Effect::AcidHeal(magnitude) => apply_multiplier(*magnitude, 1.125),
         Effect::Damage(magnitude) => *magnitude,
+        Effect::Shield(magnitude) => apply_multiplier(*magnitude, 1.375),
     }
 }

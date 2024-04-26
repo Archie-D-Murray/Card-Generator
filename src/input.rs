@@ -42,12 +42,13 @@ pub fn get_effect(card: &Card) -> Effect {
     let budget = card.budget;
     let effect_type: i32 = get_num(
         1,
-        3,
+        4,
         String::from(
-            format!("{}{}{}\nEnter effect type: (1..3).. ", 
+            format!("{}{}{}{}\nEnter effect type: (1..4).. ", 
                 pad_right(format!("1: Damage (Cost: {})", display_effect_cost(cost_from_effect(Effect::Damage(0), budget, &card.range, &card.config))), PADDING, ' '),
                 pad_right(format!("2: Heal (Cost: {})", display_effect_cost(cost_from_effect(Effect::Heal(0), budget, &card.range, &card.config))), PADDING, ' '),
                 pad_right(format!("3: Acid Healing (Cost: {})", display_effect_cost(cost_from_effect(Effect::AcidHeal(0), budget, &card.range, &card.config))), PADDING, ' '),
+                pad_right(format!("4: Shield (Cost: {})", display_effect_cost(cost_from_effect(Effect::Shield(0), budget, &card.range, &card.config))), PADDING, ' '),
             )
         ),
     ) - 1;
@@ -55,6 +56,7 @@ pub fn get_effect(card: &Card) -> Effect {
         0 => Effect::Damage(0),
         1 => Effect::Heal(0),
         2 => Effect::AcidHeal(0),
+        3 => Effect::Shield(0),
         _ => Effect::Damage(0),
     }
 }

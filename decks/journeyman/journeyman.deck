@@ -18,7 +18,7 @@
       }
     },
     {
-      "name": "Epic Acid Heal",
+      "name": "Epic Shield",
       "rarity": {
         "type": "Epic"
       },
@@ -30,7 +30,7 @@
         "type": "Single"
       },
       "effect": {
-        "type": "AcidHeal",
+        "type": "Shield",
         "magnitude": 0
       }
     },

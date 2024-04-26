@@ -26,7 +26,7 @@
     "uncommon": 3.5,
     "rare": 1.75,
     "epic": 1.5,
-    "legendary": 0.75
+    "legendary": 1.0
   },
   "damage_range_modifiers": {
     "single": 1.0,
@@ -35,15 +35,21 @@
     "aoe_extended": 0.75
   },
   "heal_range_modifiers": {
-    "single": 1.0,
+    "single": 1.5,
     "multiple": 2.0,
     "aoe": 1.25,
     "aoe_extended": 1.5
   },
   "acid_heal_range_modifiers": {
-    "single": 1.0,
+    "single": 1.25,
     "multiple": 1.25,
     "aoe": 1.75,
     "aoe_extended": 2.0
+  },
+  "shield_heal_range_modifiers": {
+    "single": 1.5,
+    "multiple": 2.0,
+    "aoe": 1.25,
+    "aoe_extended": 1.5
   }
 }
