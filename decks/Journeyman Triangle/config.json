@@ -1,0 +1,55 @@
+{
+  "rarity_ranges": {
+    "common": {
+      "min": 4,
+      "max": 4
+    },
+    "uncommon": {
+      "min": 5,
+      "max": 8
+    },
+    "rare": {
+      "min": 10,
+      "max": 12
+    },
+    "epic": {
+      "min": 14,
+      "max": 16
+    },
+    "legendary": {
+      "min": 18,
+      "max": 20
+    }
+  },
+  "power_to_priority": {
+    "common": 4.0,
+    "uncommon": 3.5,
+    "rare": 1.75,
+    "epic": 1.5,
+    "legendary": 0.75
+  },
+  "damage_range_modifiers": {
+    "single": 1.0,
+    "multiple": 1.25,
+    "aoe": 0.875,
+    "aoe_extended": 0.75
+  },
+  "heal_range_modifiers": {
+    "single": 1.5,
+    "multiple": 2.0,
+    "aoe": 1.25,
+    "aoe_extended": 1.5
+  },
+  "acid_heal_range_modifiers": {
+    "single": 1.25,
+    "multiple": 1.25,
+    "aoe": 1.75,
+    "aoe_extended": 2.0
+  },
+  "shield_heal_range_modifiers": {
+    "single": 1.5,
+    "multiple": 2.0,
+    "aoe": 1.25,
+    "aoe_extended": 1.5
+  }
+}

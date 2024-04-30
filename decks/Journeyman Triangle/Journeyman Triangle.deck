@@ -1,0 +1,89 @@
+{
+  "inputs": [
+    {
+      "name": "Epic Damage",
+      "rarity": {
+        "type": "Epic"
+      },
+      "efficiency": {
+        "type": "Good"
+      },
+      "priority_allocation": 3,
+      "range": {
+        "type": "ExtendedAoE"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 9
+      }
+    },
+    {
+      "name": "Epic Acid Heal",
+      "rarity": {
+        "type": "Epic"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "priority_allocation": 6,
+      "range": {
+        "type": "Multiple"
+      },
+      "effect": {
+        "type": "AcidHeal",
+        "magnitude": 5
+      }
+    },
+    {
+      "name": "Rare Shield",
+      "rarity": {
+        "type": "Rare"
+      },
+      "efficiency": {
+        "type": "Good"
+      },
+      "priority_allocation": 4,
+      "range": {
+        "type": "AoE"
+      },
+      "effect": {
+        "type": "Shield",
+        "magnitude": 4
+      }
+    },
+    {
+      "name": "Rare Damage",
+      "rarity": {
+        "type": "Rare"
+      },
+      "efficiency": {
+        "type": "Normal"
+      },
+      "priority_allocation": 5,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
+        "type": "Damage",
+        "magnitude": 5
+      }
+    },
+    {
+      "name": "Uncommon Heal",
+      "rarity": {
+        "type": "Uncommon"
+      },
+      "efficiency": {
+        "type": "Normal"
+      },
+      "priority_allocation": 2,
+      "range": {
+        "type": "Multiple"
+      },
+      "effect": {
+        "type": "Heal",
+        "magnitude": 1
+      }
+    }
+  ]
+}
