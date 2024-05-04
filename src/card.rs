@@ -21,7 +21,7 @@ impl DeckInputs {
             inputs: match deck_type {
                 DeckType::Starter => {
                     [
-                        CardInput::new(Rarity::Epic),
+                        CardInput::new(Rarity::Rare),
                         CardInput::new(Rarity::Rare),
                         CardInput::new(Rarity::Uncommon),
                         CardInput::new(Rarity::Uncommon),
@@ -377,7 +377,12 @@ pub fn priority_from_budget(budget: i32, rarity: &Rarity, config: &Config) -> i3
     if budget < 0 {
         0
     } else {
-        (apply_multiplier(budget, config.power_to_priority.get_modifier(rarity))).clamp(1, DEFAULT_PRIORITY)
+        let value = (apply_multiplier(budget, config.power_to_priority.get_modifier(rarity))).clamp(1, DEFAULT_PRIORITY);
+        if value % 2 == 0 {
+            value + 1
+        } else {
+            value
+        }
     }
 }
 

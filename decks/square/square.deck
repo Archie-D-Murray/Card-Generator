@@ -6,11 +6,11 @@
         "type": "Rare"
       },
       "efficiency": {
-        "type": "Good"
+        "type": "Normal"
       },
       "priority_allocation": 3,
       "range": {
-        "type": "AoE"
+        "type": "Multiple"
       },
       "effect": {
         "type": "Damage",
@@ -18,20 +18,37 @@
       }
     },
     {
-      "name": "Rare Acid Heal",
+      "name": "Rare Heal",
       "rarity": {
         "type": "Rare"
       },
       "efficiency": {
-        "type": "Bad"
+        "type": "Good"
       },
       "priority_allocation": 2,
       "range": {
         "type": "Multiple"
       },
       "effect": {
+        "type": "Heal",
+        "magnitude": 3
+      }
+    },
+    {
+      "name": "Uncommon Acid Healing",
+      "rarity": {
+        "type": "Uncommon"
+      },
+      "efficiency": {
+        "type": "Bad"
+      },
+      "priority_allocation": 2,
+      "range": {
+        "type": "Single"
+      },
+      "effect": {
         "type": "AcidHeal",
-        "magnitude": 0
+        "magnitude": 2
       }
     },
     {
@@ -42,19 +59,19 @@
       "efficiency": {
         "type": "Good"
       },
-      "priority_allocation": 1,
+      "priority_allocation": 2,
       "range": {
         "type": "Single"
       },
       "effect": {
         "type": "Damage",
-        "magnitude": 0
+        "magnitude": 2
       }
     },
     {
-      "name": "Uncommon Heal",
+      "name": "Common Damage",
       "rarity": {
-        "type": "Uncommon"
+        "type": "Common"
       },
       "efficiency": {
         "type": "Good"
@@ -64,25 +81,8 @@
         "type": "Single"
       },
       "effect": {
-        "type": "Heal",
-        "magnitude": 0
-      }
-    },
-    {
-      "name": "Common Acid Heal",
-      "rarity": {
-        "type": "Common"
-      },
-      "efficiency": {
-        "type": "Good"
-      },
-      "priority_allocation": 1,
-      "range": {
-        "type": "Single"
-      },
-      "effect": {
-        "type": "AcidHeal",
-        "magnitude": 0
+        "type": "Damage",
+        "magnitude": 3
       }
     }
   ]

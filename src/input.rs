@@ -27,7 +27,7 @@ where
 }
 
 pub fn get_priority_allocation(card: &Card) -> i32 {
-    get_num(1, card.budget - 1, format!("Enter priority allocation ({}..{}): ", 1, card.budget - 1))
+    get_num(1, card.budget - 1, format!("Enter priority allocation (even) ({}..{}): ", 1, card.budget - 1))
 }
 
 pub fn display_effect_cost(effect_data: (Option<Effect>, i32)) -> String {
